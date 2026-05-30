@@ -16,15 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UapDocumentLoaderService {
+public class DocumentLoaderService {
 
-    private static final Logger log = LoggerFactory.getLogger(UapDocumentLoaderService.class);
+    private static final Logger log = LoggerFactory.getLogger(DocumentLoaderService.class);
     private static final String DOCUMENTS_LOCATION = "classpath:uapDocuments/**/*";
 
     private final VectorStore vectorStore;
     private final TokenTextSplitter textSplitter;
 
-    public UapDocumentLoaderService(VectorStore vectorStore) {
+    public DocumentLoaderService(VectorStore vectorStore) {
         this.vectorStore = vectorStore;
         // Keep chunks well below OpenAI's ~8k embedding limit (batching reserves 10%).
         this.textSplitter = TokenTextSplitter.builder()
@@ -58,8 +58,12 @@ public class UapDocumentLoaderService {
 
             log.info("Reading {}", resource.getFilename());
             TikaDocumentReader reader = new TikaDocumentReader(resource);
-            reader.getCustomMetadata().put("filename", resource.getFilename());
-            documents.addAll(reader.read());
+
+            reader.read().forEach( (item) -> {
+                item.getMetadata().put("fileName", resource.getFilename());
+                documents.add(item);
+            });
+
             filesLoaded++;
         }
 

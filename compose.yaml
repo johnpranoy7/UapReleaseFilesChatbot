@@ -1,4 +1,15 @@
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_started
+
   postgres:
     image: pgvector/pgvector:pg16
     environment:

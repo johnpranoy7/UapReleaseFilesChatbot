@@ -1,6 +1,6 @@
-package com.jy.uap.uapreleasefileschatbot;
+package com.jy.uap.uapreleasefileschatbot.controller;
 
-import com.jy.uap.uapreleasefileschatbot.service.UapDocumentLoaderService;
+import com.jy.uap.uapreleasefileschatbot.service.DocumentLoaderService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,9 +10,9 @@ import java.util.Map;
 @RestController
 public class LoadFilesController {
 
-    private final UapDocumentLoaderService documentLoaderService;
+    private final DocumentLoaderService documentLoaderService;
 
-    public LoadFilesController(UapDocumentLoaderService documentLoaderService) {
+    public LoadFilesController(DocumentLoaderService documentLoaderService) {
         this.documentLoaderService = documentLoaderService;
     }
 

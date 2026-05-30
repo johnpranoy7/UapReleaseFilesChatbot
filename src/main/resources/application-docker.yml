@@ -1,14 +1,11 @@
 spring:
-  # Datasource URL/credentials are auto-configured from compose.yaml when Docker Compose
-  # dev services are enabled. Keep these as a fallback if you start Postgres manually.
-  datasource:
-    url: jdbc:postgresql://localhost:5432/uap_chatbot
-    username: root
-    password: toor
   docker:
     compose:
-      enabled: true
-      lifecycle-management: start-and-stop
+      enabled: false
+  datasource:
+    url: jdbc:postgresql://postgres:5432/uap_chatbot
+    username: root
+    password: toor
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -30,3 +27,6 @@ spring:
         initialize-schema: true
         distance-type: COSINE_DISTANCE
         dimensions: 1536
+
+server:
+  port: 8080
