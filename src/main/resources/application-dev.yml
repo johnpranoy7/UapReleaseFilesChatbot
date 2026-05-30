@@ -1,0 +1,27 @@
+spring:
+  # Datasource URL/credentials are auto-configured from compose.yaml when Docker Compose
+  # dev services are enabled. Keep these as a fallback if you start Postgres manually.
+  datasource:
+    url: jdbc:postgresql://localhost:5432/uap_chatbot
+    username: root
+    password: toor
+  docker:
+    compose:
+      enabled: true
+      lifecycle-management: start-and-stop
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.1
+          max-tokens: 300
+      embedding:
+        options:
+          model: text-embedding-3-small
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
