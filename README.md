@@ -4,6 +4,9 @@ A Spring Boot + Spring AI chatbot with a React UI that answers questions about *
 
 ![UAP Release Files Chatbot UI](docs/images/ui-screenshot.png)
 
+![UAP Release Files Chatbot UI](docs/images/ui-screenshot1.png)
+![UAP Release Files Chatbot UI](docs/images/img.png)
+
 ## Features
 
 - **RAG document search** — indexes PDFs from `src/main/resources/uapDocuments` into PostgreSQL/pgvector and retrieves relevant chunks at query time
