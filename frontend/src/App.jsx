@@ -41,13 +41,24 @@ export default function App() {
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
-  const [promptsExpanded, setPromptsExpanded] = useState(true);
+  const [promptsExpanded, setPromptsExpanded] = useState(false);
   const [sideNavTab, setSideNavTab] = useState(SIDE_NAV_TABS.RECRUITERS);
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const questionInputRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (messages.length === 0 && !loading) {
+      return;
+    }
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollTop = container.scrollHeight;
   }, [messages, loading]);
 
   useEffect(() => {
@@ -198,9 +209,6 @@ export default function App() {
 
       <div className="app-layout">
         <aside className="side-nav" aria-label="Chatbot tools and usage">
-          <p className="side-nav-eyebrow">How it works</p>
-          <h2 className="side-nav-title">Built-in tools</h2>
-
           <div className="side-nav-tabs" role="tablist" aria-label="Sidebar audience">
             <button
               type="button"
@@ -234,41 +242,28 @@ export default function App() {
               className="side-nav-panel"
             >
               <p className="side-nav-intro">
-                Pick a suggested prompt or ask your own question. The assistant chooses the right capability
-                automatically — document search for UAP release files, or NASA APOD for astronomy images.
+                Pick a suggested prompt below or type your own question. The assistant routes to document
+                search or NASA APOD automatically.
               </p>
 
               <div className="tool-card">
                 <h4>Document search <span className="tool-tag">RAG</span></h4>
-                <p>
-                  Searches embedded UAP declassified release PDFs and answers from retrieved context — sightings,
-                  intelligence reports, and related release content.
-                </p>
+                <p>Answers from embedded UAP release PDFs — sightings, reports, and release content.</p>
                 <p className="tool-example">
-                  Example: &ldquo;What UAP incidents are described in the release files?&rdquo;
+                  &ldquo;What UAP incidents are described in the release files?&rdquo;
                 </p>
               </div>
 
               <div className="tool-card">
-                <h4>NASA picture of the day <span className="tool-tag">Tool call</span></h4>
-                <p>
-                  Fetches NASA&apos;s Astronomy Picture of the Day for today or a date you specify — including
-                  relative dates in plain English. Spring AI resolves the date and passes{' '}
-                  <code>YYYY-MM-DD</code> to the tool for you.
-                </p>
+                <h4>NASA APOD <span className="tool-tag">Tool call</span></h4>
+                <p>Astronomy picture of the day for today or any date you describe in plain English.</p>
                 <p className="tool-example">
-                  Try: &ldquo;Show me NASA&apos;s picture of the day for February 14, two years before the current year&rdquo;
+                  See suggested prompts in the chat panel for a relative-date example.
                 </p>
               </div>
 
               <p className="side-nav-note">
-                <strong>Confidence</strong> shows how well retrieved context supports the answer (0–100%).
-                If nothing useful is found, the assistant says it doesn&apos;t know instead of inventing an answer.
-              </p>
-
-              <p className="side-nav-note side-nav-note-warn">
-                <strong>Note:</strong> NASA APOD can be slow — the assistant may take extra time while the API
-                responds and the image loads.
+                <strong>Confidence</strong> reflects answer strength (0–100%). NASA requests may take a little longer.
               </p>
             </section>
           )}
@@ -318,7 +313,7 @@ export default function App() {
           {status && <span className="status-pill">{status}</span>}
         </div>
 
-        <div className="messages" role="log" aria-live="polite">
+        <div className="messages" role="log" aria-live="polite" ref={messagesContainerRef}>
           {messages.length === 0 && !loading && (
             <div className="empty-state">
               <p>Ask a question below, or pick a suggested prompt to get started.</p>
@@ -358,7 +353,6 @@ export default function App() {
               <p>Searching release files and composing an answer…</p>
             </article>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         {error && <div className="error-banner">{error}</div>}
