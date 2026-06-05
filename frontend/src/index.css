@@ -29,8 +29,15 @@ textarea {
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 24px;
-  max-width: 1100px;
+  max-width: 1320px;
   margin: 0 auto;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 24px;
+  min-height: 0;
 }
 
 .backdrop {
@@ -44,12 +51,88 @@ textarea {
 }
 
 .header,
-.chat-panel {
+.chat-panel,
+.side-nav {
   backdrop-filter: blur(16px);
   background: rgba(10, 15, 28, 0.78);
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 20px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+.side-nav {
+  padding: 22px 20px;
+  align-self: start;
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.side-nav-eyebrow {
+  margin: 0 0 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #67e8f9;
+}
+
+.side-nav-title {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+
+.side-nav-intro {
+  margin: 0 0 18px;
+  color: #94a3b8;
+  font-size: 0.92rem;
+}
+
+.tool-card {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.tool-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
+.tool-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.tool-card p + p {
+  margin-top: 10px;
+}
+
+.tool-example {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem !important;
+  color: #cbd5e1 !important;
+}
+
+.side-nav-note {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(120, 53, 15, 0.22);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  color: #fde68a;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.side-nav-note strong {
+  color: #fef3c7;
 }
 
 .header {
@@ -145,10 +228,33 @@ textarea {
 
 .messages {
   padding: 20px;
+  min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.5);
+}
+
+.messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 4px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.65);
 }
 
 .empty-state {
@@ -327,6 +433,17 @@ textarea {
   background: rgba(127, 29, 29, 0.35);
   border: 1px solid rgba(248, 113, 113, 0.35);
   color: #fecaca;
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side-nav {
+    position: static;
+    max-height: none;
+  }
 }
 
 @media (max-width: 768px) {

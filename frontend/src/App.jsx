@@ -132,7 +132,39 @@ export default function App() {
         </div>
       </header>
 
-      <main className="chat-panel">
+      <div className="app-layout">
+        <aside className="side-nav" aria-label="Chatbot tools and usage">
+          <p className="side-nav-eyebrow">How it works</p>
+          <h2 className="side-nav-title">Built-in tools</h2>
+          <p className="side-nav-intro">
+            The assistant picks the right tool from your question. You do not need to name the tools yourself.
+          </p>
+
+          <section className="tool-card">
+            <h3>Document search</h3>
+            <p>
+              Runs a RAG search over the UAP Files Release 2 documents and answers questions about sightings,
+              intelligence reports, and release file content.
+            </p>
+            <p className="tool-example">Example: &ldquo;What UAP incidents are in the CIA release files?&rdquo;</p>
+          </section>
+
+          <section className="tool-card">
+            <h3>NASA picture of the day</h3>
+            <p>
+              Fetches NASA&apos;s Astronomy Picture of the Day for today or a date you specify, then returns the
+              image and a short description.
+            </p>
+            <p className="tool-example">Example: &ldquo;Show me NASA&apos;s picture for March 2&rdquo;</p>
+          </section>
+
+          <p className="side-nav-note">
+            <strong>Note:</strong> NASA APOD requests can be slow. The assistant may take extra time while the API
+            responds and the image loads.
+          </p>
+        </aside>
+
+        <main className="chat-panel">
         <div className="meta-bar">
           <span>Session: {chatId.slice(0, 8)}…</span>
           {status && <span className="status-pill">{status}</span>}
@@ -228,7 +260,8 @@ export default function App() {
             </button>
           </div>
         </form>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
