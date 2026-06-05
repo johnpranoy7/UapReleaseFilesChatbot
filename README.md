@@ -3,7 +3,7 @@
 A Spring Boot + Spring AI chatbot with a React UI that answers questions about **UAP/UFO Release 02** documents using RAG, and can fetch **NASA Astronomy Picture of the Day (APOD)** through tool calling.
 
 ![UAP Release Files Chatbot UI](docs/images/img.png)
-![UAP Release Files Chatbot UI](docs/images/img_1.png)
+![UAP Release Files Chatbot UI](docs/images/img_2.png)
 
 
 ## Features
