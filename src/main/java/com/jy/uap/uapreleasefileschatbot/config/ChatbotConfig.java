@@ -3,45 +3,51 @@ package com.jy.uap.uapreleasefileschatbot.config;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
 import org.springframework.ai.chat.memory.repository.jdbc.PostgresChatMemoryRepositoryDialect;
 import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ChatbotConfig {
 
     private static final String SYSTEM_PROMPT = """
-            You are a chatbot answering questions about UFOs and UAPs using the retrieved document context.
-            Use the retrieved context as your primary source. If the context contains relevant information,
-            answer the question even when the text is partial or imperfect. Only when the retrieved context
-            has no relevant information at all, respond with:
-            message: "I do not know. You are not getting any pulsating answers here.", confidence: 0.0, source: ""
+            Today is {currentDate}. Resolve ALL relative dates from this value only — never guess years from memory.
+            "Last year" = calendar year before {currentDate}'s year. "May 10 last year" = May 10 of that year. "Today" → omit APOD date.
 
-            Respond with JSON only using exactly these fields:
-            - message: your answer to the user
-            - confidence: a number from 0.0 to 1.0 indicating how confident you are
-            - source: comma-separated filenames from the retrieved context (use the fileName metadata field)
+            UAP questions → searchUapReleaseDocuments.
+            NASA pictures → getNasaApod (omit date for today, else pass resolved YYYY-MM-DD).
+
+            JSON only: message, confidence (0.0-1.0), imageUrl (from APOD or null).
+            If nothing useful: message "I do not know. You are not getting any pulsating answers here.", confidence 0.0, imageUrl null.
             """;
 
     @Bean
-    public ChatClient openAiChatClient(OpenAiChatModel chatModel, PgVectorStore vectorStore, ChatMemory chatMemory) {
+    public ToolCallAdvisor toolCallAdvisor() {
+        return ToolCallAdvisor.builder()
+                .disableInternalConversationHistory()
+                .advisorOrder(Ordered.HIGHEST_PRECEDENCE + 300)
+                .build();
+    }
+
+    @Bean
+    public ChatClient openAiChatClient(
+            OpenAiChatModel chatModel,
+            ChatMemory chatMemory,
+            AppTools appTools) {
         return ChatClient.builder(chatModel)
+                .defaultTools(appTools)
                 .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
-                        QuestionAnswerAdvisor.builder(vectorStore)
-                                .searchRequest(SearchRequest.builder()
-                                        .topK(10)
-                                        .similarityThreshold(0.0)
-                                        .build())
+                        MessageChatMemoryAdvisor.builder(chatMemory)
+                                .order(Ordered.HIGHEST_PRECEDENCE + 200)
                                 .build(),
                         new SimpleLoggerAdvisor())
                 .defaultSystem(SYSTEM_PROMPT)
@@ -53,7 +59,7 @@ public class ChatbotConfig {
 
         JdbcChatMemoryRepository repository = JdbcChatMemoryRepository.builder()
                 .jdbcTemplate(jdbcTemplate)
-                .dialect(new PostgresChatMemoryRepositoryDialect())  // PostgreSQL specific
+                .dialect(new PostgresChatMemoryRepositoryDialect())
                 .build();
 
         return MessageWindowChatMemory.builder()

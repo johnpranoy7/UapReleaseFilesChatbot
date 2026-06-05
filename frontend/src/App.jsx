@@ -53,7 +53,6 @@ export default function App() {
           role: 'assistant',
           text: response.message,
           confidence: response.confidence,
-          source: response.source,
           imageUrl: response.imageUrl,
         },
       ]);
@@ -168,9 +167,6 @@ export default function App() {
                   <span className={`confidence ${confidenceLabel(message.confidence)}`}>
                     Confidence: {(message.confidence * 100).toFixed(0)}%
                   </span>
-                  {message.source && (
-                    <span className="source">Source: {message.source}</span>
-                  )}
                 </div>
               )}
             </article>

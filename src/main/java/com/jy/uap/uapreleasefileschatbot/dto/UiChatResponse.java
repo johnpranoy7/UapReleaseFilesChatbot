@@ -10,5 +10,5 @@ import lombok.Setter;
 public class UiChatResponse {
     private String message;
     private float confidence;
-    private String source;
+    private String imageUrl;
 }

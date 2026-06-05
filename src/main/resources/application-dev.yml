@@ -16,7 +16,7 @@ spring:
         options:
           model: gpt-4o-mini
           temperature: 0.1
-          max-tokens: 300
+          max-tokens: 1000
       embedding:
         options:
           model: text-embedding-3-small
@@ -30,3 +30,8 @@ spring:
         initialize-schema: true
         distance-type: COSINE_DISTANCE
         dimensions: 1536
+
+nasa:
+  api:
+    url: https://api.nasa.gov/planetary/apod
+  api-key: ${NASA_API_KEY}
