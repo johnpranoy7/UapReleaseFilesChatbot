@@ -15,6 +15,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background: #05070f;
+  overflow: hidden;
 }
 
 button,
@@ -24,13 +25,15 @@ textarea {
 
 .app-shell {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   padding: 24px;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 24px;
   max-width: 1320px;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 .app-layout {
@@ -38,7 +41,7 @@ textarea {
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   gap: 24px;
   min-height: 0;
-  align-items: start;
+  overflow: hidden;
 }
 
 .backdrop {
@@ -63,11 +66,25 @@ textarea {
 
 .side-nav {
   padding: 22px 20px;
-  align-self: start;
-  position: sticky;
-  top: 24px;
-  max-height: calc(100vh - 48px);
+  min-height: 0;
   overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.5);
+}
+
+.side-nav::-webkit-scrollbar {
+  width: 8px;
+}
+
+.side-nav::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.side-nav::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 4px;
 }
 
 .side-nav-eyebrow {
@@ -348,9 +365,7 @@ textarea {
   justify-content: space-between;
   gap: 20px;
   align-items: flex-start;
-  position: sticky;
-  top: 12px;
-  z-index: 20;
+  flex-shrink: 0;
 }
 
 .header-main {
@@ -412,11 +427,37 @@ textarea {
 }
 
 .header-portfolio-content {
-  padding: 14px;
+  padding: 12px 14px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-top: none;
   border-radius: 0 0 12px 12px;
   background: rgba(15, 23, 42, 0.35);
+  max-height: min(148px, 26vh);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.5);
+}
+
+.header-portfolio-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.header-portfolio-content::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 4px;
+}
+
+.header-portfolio-content .header-name {
+  font-size: 1.15rem;
+}
+
+.header-portfolio-content .header-role {
+  font-size: 0.88rem;
+}
+
+.header-portfolio-content .header-links {
+  margin-top: 10px;
 }
 
 .header-portfolio-eyebrow {
@@ -534,9 +575,8 @@ textarea {
 
 .chat-panel {
   display: grid;
-  grid-template-rows: auto minmax(220px, 1fr) auto auto;
-  max-height: calc(100vh - 220px);
-  min-height: 420px;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -765,17 +805,27 @@ textarea {
 }
 
 @media (max-width: 900px) {
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .app-layout {
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 
   .side-nav {
-    position: static;
     max-height: none;
+    overflow: visible;
   }
 
   .chat-panel {
-    max-height: none;
     min-height: 480px;
   }
 }

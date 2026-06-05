@@ -67,6 +67,7 @@ export default function App() {
   useEffect(() => {
     if (messages.length > 0) {
       setPromptsExpanded(false);
+      setDeveloperDetailsExpanded(false);
     }
   }, [messages.length]);
 
