@@ -43,7 +43,8 @@ export default function App() {
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
-  const [promptsExpanded, setPromptsExpanded] = useState(false);
+  const [promptsExpanded, setPromptsExpanded] = useState(true);
+  const [developerDetailsExpanded, setDeveloperDetailsExpanded] = useState(true);
   const [sideNavTab, setSideNavTab] = useState(SIDE_NAV_TABS.RECRUITERS);
   const messagesContainerRef = useRef(null);
   const questionInputRef = useRef(null);
@@ -156,46 +157,61 @@ export default function App() {
               (Release 02, May 2025) or request NASA&apos;s Astronomy Picture of the Day.
             </p>
           </div>
-
-          <div className="header-portfolio">
-            <p className="header-portfolio-eyebrow">Open to software developer roles</p>
-            <p className="header-name">{PORTFOLIO.name}</p>
-            <p className="header-role">{PORTFOLIO.role}</p>
-            <div className="header-links">
-              <a
-                href={PORTFOLIO.linkedIn}
-                className="header-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                LinkedIn
-              </a>
-              <a
-                href={PORTFOLIO.github}
-                className="header-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GitHub
-              </a>
-              <a href={`mailto:${PORTFOLIO.email}`} className="header-link">
-                Email
-              </a>
-              {PORTFOLIO.resume && (
-                <a
-                  href={PORTFOLIO.resume}
-                  className="header-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Resume
-                </a>
-              )}
-            </div>
+          <div className={`header-portfolio${developerDetailsExpanded ? ' expanded' : ''}`}>
+            <button
+              type="button"
+              className="header-portfolio-toggle"
+              onClick={() => setDeveloperDetailsExpanded((expanded) => !expanded)}
+              aria-expanded={developerDetailsExpanded}
+              aria-controls="header-portfolio-panel"
+            >
+              <span className="header-portfolio-toggle-title">Portfolio &amp; contact</span>
+              <span className="header-portfolio-toggle-icon" aria-hidden="true">
+                {developerDetailsExpanded ? '▾' : '▸'}
+              </span>
+            </button>
+            {developerDetailsExpanded && (
+              <div id="header-portfolio-panel" className="header-portfolio-content">
+                <p className="header-portfolio-eyebrow">Open to software developer roles</p>
+                <p className="header-name">{PORTFOLIO.name}</p>
+                <p className="header-role">{PORTFOLIO.role}</p>
+                <div className="header-links">
+                  <a
+                    href={PORTFOLIO.linkedIn}
+                    className="header-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    LinkedIn
+                  </a>
+                  <a
+                    href={PORTFOLIO.github}
+                    className="header-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    GitHub
+                  </a>
+                  <a href={`mailto:${PORTFOLIO.email}`} className="header-link">
+                    Email
+                  </a>
+                  {PORTFOLIO.resume && (
+                    <a
+                      href={PORTFOLIO.resume}
+                      className="header-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Resume
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="header-actions">
-          <button
+        <button
             type="button"
             className="secondary-button"
             onClick={handleLoadDocuments}
@@ -211,6 +227,11 @@ export default function App() {
 
       <div className="app-layout">
         <aside className="side-nav" aria-label="Chatbot tools and usage">
+          <div className="side-nav-header">
+            <p className="side-nav-eyebrow">Guide</p>
+            <h2 className="side-nav-title">How to use this demo</h2>
+          </div>
+
           <div className="side-nav-tabs" role="tablist" aria-label="Sidebar audience">
             <button
               type="button"
@@ -232,7 +253,7 @@ export default function App() {
               aria-controls="side-nav-panel-developer"
               onClick={() => setSideNavTab(SIDE_NAV_TABS.DEVELOPER)}
             >
-              Developer
+              How it works
             </button>
           </div>
 
@@ -243,10 +264,12 @@ export default function App() {
               aria-labelledby="side-nav-tab-recruiters"
               className="side-nav-panel"
             >
+              <h3 className="side-nav-panel-heading">Try the demo</h3>
               <p className="side-nav-intro">
-                Pick a suggested prompt below or type your own question. The assistant routes to document
-                search or NASA APOD automatically.
+                Pick a suggested prompt below or type your own question.
               </p>
+
+              <p className="side-nav-section-label">Built-in tools</p>
 
               <div className="tool-card">
                 <h4>Document search <span className="tool-tag">RAG</span></h4>
@@ -274,6 +297,7 @@ export default function App() {
                 </p>
               </div>
 
+              <p className="side-nav-section-label">Tip</p>
               <p className="side-nav-note">
                 <strong>Confidence</strong> reflects answer strength (0–100%). NASA requests may take a little longer.
               </p>
@@ -287,12 +311,13 @@ export default function App() {
               aria-labelledby="side-nav-tab-developer"
               className="side-nav-panel"
             >
+              <h3 className="side-nav-panel-heading">How it works</h3>
               <p className="side-nav-intro">
-                No keyword-based intent routing. Spring AI uses{' '}
-                <strong>tool calling</strong> — the model picks{' '}
-                <code>searchUapReleaseDocuments</code> or <code>getNasaApod</code> and fills arguments from the
-                user&apos;s question.
+                Tool calling routes each request at runtime — the model picks the right tool and fills
+                arguments from the user&apos;s question.
               </p>
+
+              <p className="side-nav-section-label">Architecture</p>
 
               <ul className="side-nav-list">
                 <li>PDFs chunked and embedded into <strong>pgvector</strong> (OpenAI embeddings, top-K retrieval)</li>

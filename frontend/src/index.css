@@ -80,8 +80,38 @@ textarea {
 }
 
 .side-nav-title {
-  margin: 0 0 14px;
-  font-size: 1.15rem;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.side-nav-header {
+  margin-bottom: 14px;
+}
+
+.side-nav-header .side-nav-eyebrow {
+  margin-bottom: 6px;
+}
+
+.side-nav-panel-heading {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.side-nav-section-label {
+  margin: 0 0 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #67e8f9;
+}
+
+.side-nav-section-label + .side-nav-note {
+  margin-top: 0;
 }
 
 .side-nav-tabs {
@@ -119,6 +149,7 @@ textarea {
 
 .side-nav-panel .side-nav-intro {
   margin-top: 0;
+  margin-bottom: 16px;
 }
 
 .side-nav-intro {
@@ -329,8 +360,63 @@ textarea {
 }
 
 .header-portfolio {
-  padding-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.header-portfolio:not(.expanded) {
+  padding-top: 14px;
+}
+
+.header-portfolio-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.45);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.header-portfolio-toggle:hover {
+  border-color: rgba(165, 180, 252, 0.32);
+  background: rgba(165, 180, 252, 0.08);
+}
+
+.header-portfolio.expanded .header-portfolio-toggle {
+  border-radius: 12px 12px 0 0;
+  border-bottom-color: rgba(148, 163, 184, 0.08);
+}
+
+.header-portfolio-toggle-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.header-portfolio-toggle-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #a5b4fc;
+}
+
+.header-portfolio-content {
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  background: rgba(15, 23, 42, 0.35);
 }
 
 .header-portfolio-eyebrow {
