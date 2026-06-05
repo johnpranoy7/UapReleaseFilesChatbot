@@ -28,6 +28,8 @@ const PORTFOLIO = {
   resume: '/resume.pdf',
 };
 
+const NASA_APOD_API_REF = 'https://github.com/nasa/apod-api';
+
 function resolvedApodExampleDate() {
   const year = new Date().getFullYear() - 2;
   return `${year}-02-14`;
@@ -256,7 +258,17 @@ export default function App() {
 
               <div className="tool-card">
                 <h4>NASA APOD <span className="tool-tag">Tool call</span></h4>
-                <p>Astronomy picture of the day for today or any date you describe in plain English.</p>
+                <p>
+                  Astronomy picture of the day for today or any date you describe in plain English.{' '}
+                  <a
+                    href={NASA_APOD_API_REF}
+                    className="side-nav-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    NASA APOD API
+                  </a>
+                </p>
                 <p className="tool-example">
                   See suggested prompts in the chat panel for a relative-date example.
                 </p>
@@ -302,6 +314,14 @@ export default function App() {
               <p className="side-nav-stack">
                 <span className="side-nav-stack-label">Built with</span>
                 Spring Boot · Spring AI · OpenAI · pgvector · React · Docker · Render · Supabase
+              </p>
+
+              <p className="side-nav-reference">
+                <span className="side-nav-stack-label">Reference</span>
+                NASA APOD API:{' '}
+                <a href={NASA_APOD_API_REF} target="_blank" rel="noopener noreferrer">
+                  github.com/nasa/apod-api
+                </a>
               </p>
             </section>
           )}

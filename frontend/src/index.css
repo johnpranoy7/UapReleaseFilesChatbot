@@ -208,6 +208,28 @@ textarea {
   color: #67e8f9;
 }
 
+.side-nav-reference {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.side-nav-reference a,
+.side-nav-link {
+  color: #67e8f9;
+  text-decoration: none;
+}
+
+.side-nav-reference a:hover,
+.side-nav-link:hover {
+  text-decoration: underline;
+}
+
 .side-nav-dev-note {
   margin: 0 0 14px;
   padding: 12px 14px;
