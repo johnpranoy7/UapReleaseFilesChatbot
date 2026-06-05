@@ -19,6 +19,15 @@ const SIDE_NAV_TABS = {
   DEVELOPER: 'developer',
 };
 
+const PORTFOLIO = {
+  name: 'John Pranoy Yalla',
+  role: 'Software Engineer / Full Stack Developer · 6+ years experience',
+  email: 'johnpranoy7@gmail.com',
+  linkedIn: 'https://www.linkedin.com/in/johnpranoy7/',
+  github: 'https://github.com/johnpranoy7',
+  resume: '/resume.pdf',
+};
+
 function resolvedApodExampleDate() {
   const year = new Date().getFullYear() - 2;
   return `${year}-02-14`;
@@ -125,12 +134,52 @@ export default function App() {
       <div className="backdrop" aria-hidden="true" />
 
       <header className="header">
-        <div>
-          <p className="eyebrow">UFO / UAP Release Files</p>
-          <h1>RAG & Toolcalling Chatbot</h1>
-          <p className="subtitle">
-            Ask questions about U.S. UAP/UFO declassified release documents (Release 02, May 2025) or request NASA&apos;s Astronomy Picture of the Day.
-          </p>
+        <div className="header-main">
+          <div className="header-project">
+            <p className="eyebrow">Portfolio demo · UFO / UAP Release Files</p>
+            <h1>RAG & Toolcalling Chatbot</h1>
+            <p className="subtitle">
+              Full-stack Spring AI app — ask questions about U.S. UAP declassified release documents
+              (Release 02, May 2025) or request NASA&apos;s Astronomy Picture of the Day.
+            </p>
+          </div>
+
+          <div className="header-portfolio">
+            <p className="header-portfolio-eyebrow">Open to software developer roles</p>
+            <p className="header-name">{PORTFOLIO.name}</p>
+            <p className="header-role">{PORTFOLIO.role}</p>
+            <div className="header-links">
+              <a
+                href={PORTFOLIO.linkedIn}
+                className="header-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn
+              </a>
+              <a
+                href={PORTFOLIO.github}
+                className="header-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub
+              </a>
+              <a href={`mailto:${PORTFOLIO.email}`} className="header-link">
+                Email
+              </a>
+              {PORTFOLIO.resume && (
+                <a
+                  href={PORTFOLIO.resume}
+                  className="header-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Resume
+                </a>
+              )}
+            </div>
+          </div>
         </div>
         <div className="header-actions">
           <button
