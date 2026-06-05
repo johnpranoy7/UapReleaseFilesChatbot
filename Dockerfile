@@ -22,4 +22,5 @@ WORKDIR /app
 COPY --from=backend-build /app/target/uapReleaseFilesChatbot-*.jar app.jar
 EXPOSE 8080
 ENV SPRING_PROFILES_ACTIVE=docker
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENV JAVA_OPTS="-Xmx384m -XX:+UseSerialGC"
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
