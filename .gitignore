@@ -13,11 +13,13 @@ target/
 .springBeans
 .sts4-cache
 
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
+*.class
 
 ### NetBeans ###
 /nbproject/private/
@@ -36,3 +38,4 @@ build/
 ### Frontend ###
 frontend/node_modules/
 frontend/dist/
+/META-INF

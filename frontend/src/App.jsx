@@ -7,26 +7,36 @@ function confidenceLabel(value) {
   return 'low';
 }
 
+const SAMPLE_PROMPTS = [
+  'What UAP incidents are described in the CIA release files?',
+  'What intelligence sources mention experimental programs?',
+  'Summarize reports related to USSR sightings.',
+  "Show me NASA's Astronomy Picture of the Day",
+];
+
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
-  const [chatId, setChatId] = useState('');
+  const [chatId, setChatId] = useState(() => getChatId());
   const [loading, setLoading] = useState(false);
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
+  const [promptsExpanded, setPromptsExpanded] = useState(true);
   const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    setChatId(getChatId());
-  }, []);
+  const questionInputRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  useEffect(() => {
+    if (messages.length > 0) {
+      setPromptsExpanded(false);
+    }
+  }, [messages.length]);
+
+  async function submitQuestion() {
     const trimmed = question.trim();
     if (!trimmed || loading) return;
 
@@ -44,12 +54,25 @@ export default function App() {
           text: response.message,
           confidence: response.confidence,
           source: response.source,
+          imageUrl: response.imageUrl,
         },
       ]);
     } catch (err) {
       setError(err.message || 'Something went wrong.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    await submitQuestion();
+  }
+
+  function handleQuestionKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      submitQuestion();
     }
   }
 
@@ -68,12 +91,19 @@ export default function App() {
     }
   }
 
+  function handleSamplePromptClick(prompt) {
+    setQuestion(prompt);
+    questionInputRef.current?.focus();
+    // handleSubmit();
+  }
+
   function handleNewChat() {
     const newChatId = resetChatId();
     setChatId(newChatId);
     setMessages([]);
     setError('');
     setStatus('');
+    setPromptsExpanded(true);
   }
 
   return (
@@ -82,10 +112,10 @@ export default function App() {
 
       <header className="header">
         <div>
-          <p className="eyebrow">UAP / UFO Release Files</p>
-          <h1>Intelligence Chatbot</h1>
+          <p className="eyebrow">UFO / UAP Release Files</p>
+          <h1>RAG & Toolcalling Chatbot</h1>
           <p className="subtitle">
-            Ask questions grounded in embedded release documents via RAG.
+            This RAG chatbot answers questions from the US Department of War documents released May 22 (Release 02).
           </p>
         </div>
         <div className="header-actions">
@@ -112,12 +142,7 @@ export default function App() {
         <div className="messages" role="log" aria-live="polite">
           {messages.length === 0 && !loading && (
             <div className="empty-state">
-              <p>Try asking:</p>
-              <ul>
-                <li>What UAP incidents are described in the CIA release files?</li>
-                <li>What intelligence sources mention experimental programs?</li>
-                <li>Summarize reports related to USSR sightings.</li>
-              </ul>
+              <p>Ask a question below, or pick a suggested prompt to get started.</p>
             </div>
           )}
 
@@ -127,9 +152,17 @@ export default function App() {
               className={`message ${message.role}`}
             >
               <div className="message-label">
-                {message.role === 'user' ? 'You' : 'Assistant'}
+                {message.role === 'user' ? 'You ' : 'Assistant'}
               </div>
               <p>{message.text}</p>
+              {message.role === 'assistant' && message.imageUrl && (
+                <img
+                  className="message-image"
+                  src={message.imageUrl}
+                  alt="NASA Astronomy Picture of the Day"
+                  loading="lazy"
+                />
+              )}
               {message.role === 'assistant' && (
                 <div className="message-meta">
                   <span className={`confidence ${confidenceLabel(message.confidence)}`}>
@@ -155,16 +188,49 @@ export default function App() {
         {error && <div className="error-banner">{error}</div>}
 
         <form className="composer" onSubmit={handleSubmit}>
-          <textarea
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Ask about UAP / UFO release documents…"
-            rows={3}
-            disabled={loading}
-          />
-          <button type="submit" disabled={loading || !question.trim()}>
-            Send
-          </button>
+          <div className="composer-suggestions">
+            <button
+              type="button"
+              className="composer-suggestions-toggle"
+              onClick={() => setPromptsExpanded((expanded) => !expanded)}
+              aria-expanded={promptsExpanded}
+              aria-controls="suggested-prompts"
+            >
+              <span>Suggested prompts</span>
+              <span className="composer-suggestions-icon" aria-hidden="true">
+                {promptsExpanded ? '▾' : '▸'}
+              </span>
+            </button>
+            {promptsExpanded && (
+              <div id="suggested-prompts" className="prompt-chips">
+                {SAMPLE_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    className="prompt-chip"
+                    onClick={() => handleSamplePromptClick(prompt)}
+                    disabled={loading}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="composer-input-row">
+            <textarea
+              ref={questionInputRef}
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              onKeyDown={handleQuestionKeyDown}
+              placeholder="Ask about UAP / UFO release documents… (Enter to send, Shift+Enter for new line)"
+              rows={3}
+              disabled={loading}
+            />
+            <button type="submit" disabled={loading || !question.trim()}>
+              Send
+            </button>
+          </div>
         </form>
       </main>
     </div>
