@@ -168,11 +168,15 @@ export default function App() {
             >
               <span className="header-portfolio-toggle-title">Portfolio &amp; contact</span>
               <span className="header-portfolio-toggle-icon" aria-hidden="true">
-                {developerDetailsExpanded ? '▾' : '▸'}
+                ▾
               </span>
             </button>
-            {developerDetailsExpanded && (
-              <div id="header-portfolio-panel" className="header-portfolio-content">
+            <div
+              id="header-portfolio-panel"
+              className={`header-portfolio-panel${developerDetailsExpanded ? ' expanded' : ''}`}
+              aria-hidden={!developerDetailsExpanded}
+            >
+              <div className="header-portfolio-content">
                 <p className="header-portfolio-eyebrow">Open to software developer roles</p>
                 <p className="header-name">{PORTFOLIO.name}</p>
                 <p className="header-role">{PORTFOLIO.role}</p>
@@ -208,7 +212,7 @@ export default function App() {
                   )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
         <div className="header-actions">
@@ -414,11 +418,15 @@ export default function App() {
             >
               <span>Suggested prompts</span>
               <span className="composer-suggestions-icon" aria-hidden="true">
-                {promptsExpanded ? '▾' : '▸'}
+                ▾
               </span>
             </button>
-            {promptsExpanded && (
-              <div id="suggested-prompts" className="prompt-chips">
+            <div
+              id="suggested-prompts"
+              className={`composer-suggestions-panel${promptsExpanded ? ' expanded' : ''}`}
+              aria-hidden={!promptsExpanded}
+            >
+              <div className="prompt-chips">
                 {SAMPLE_PROMPTS.map((prompt) => (
                   <button
                     key={prompt}
@@ -431,7 +439,7 @@ export default function App() {
                   </button>
                 ))}
               </div>
-            )}
+            </div>
           </div>
           <div className="composer-input-row">
             <textarea

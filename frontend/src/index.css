@@ -395,7 +395,10 @@ textarea {
   background: rgba(15, 23, 42, 0.45);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    border-radius 0.35s ease;
 }
 
 .header-portfolio-toggle:hover {
@@ -424,19 +427,47 @@ textarea {
   font-size: 0.75rem;
   line-height: 1;
   color: #a5b4fc;
+  transform: rotate(-90deg);
+  transition: transform 0.35s ease;
+}
+
+.header-portfolio.expanded .header-portfolio-toggle-icon {
+  transform: rotate(0deg);
+}
+
+.header-portfolio-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+
+.header-portfolio-panel.expanded {
+  grid-template-rows: 1fr;
 }
 
 .header-portfolio-content {
+  overflow: hidden;
+  min-height: 0;
   padding: 12px 14px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-top: none;
   border-radius: 0 0 12px 12px;
   background: rgba(15, 23, 42, 0.35);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.header-portfolio-panel.expanded .header-portfolio-content {
   max-height: min(148px, 26vh);
   overflow-y: auto;
+  opacity: 1;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.5);
+}
+
+.header-portfolio-panel:not(.expanded) .header-portfolio-content {
+  pointer-events: none;
 }
 
 .header-portfolio-content::-webkit-scrollbar {
@@ -643,7 +674,7 @@ textarea {
 .composer-suggestions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
 }
 
 .composer-suggestions-toggle {
@@ -660,7 +691,7 @@ textarea {
   text-transform: uppercase;
   color: #64748b;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color 0.2s ease;
 }
 
 .composer-suggestions-toggle:hover {
@@ -670,6 +701,38 @@ textarea {
 .composer-suggestions-icon {
   font-size: 0.85rem;
   line-height: 1;
+  transform: rotate(-90deg);
+  transition: transform 0.35s ease;
+}
+
+.composer-suggestions:has(.composer-suggestions-panel.expanded) .composer-suggestions-icon {
+  transform: rotate(0deg);
+}
+
+.composer-suggestions-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+
+.composer-suggestions-panel.expanded {
+  grid-template-rows: 1fr;
+}
+
+.composer-suggestions-panel > .prompt-chips {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.composer-suggestions-panel.expanded > .prompt-chips {
+  opacity: 1;
+  padding-top: 8px;
+}
+
+.composer-suggestions-panel:not(.expanded) > .prompt-chips {
+  pointer-events: none;
 }
 
 .prompt-chips {
@@ -802,6 +865,18 @@ textarea {
   background: rgba(127, 29, 29, 0.35);
   border: 1px solid rgba(248, 113, 113, 0.35);
   color: #fecaca;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-portfolio-panel,
+  .header-portfolio-content,
+  .header-portfolio-toggle,
+  .header-portfolio-toggle-icon,
+  .composer-suggestions-panel,
+  .composer-suggestions-panel > .prompt-chips,
+  .composer-suggestions-icon {
+    transition: none;
+  }
 }
 
 @media (max-width: 900px) {
