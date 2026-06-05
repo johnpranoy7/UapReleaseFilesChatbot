@@ -150,7 +150,7 @@ export default function App() {
           </section>
 
           <section className="tool-card">
-            <h3>NASA picture of the day</h3>
+            <h3>NASA picture of the day (APOD)</h3>
             <p>
               Fetches NASA&apos;s Astronomy Picture of the Day for today or a date you specify, then returns the
               image and a short description.
