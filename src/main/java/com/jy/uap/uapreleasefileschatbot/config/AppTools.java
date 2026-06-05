@@ -51,8 +51,16 @@ public class AppTools {
 
         log.info("getNasaApod called with date: {}", date);
         String requestedDate = StringUtils.hasText(date) ? date.trim() : null;
-        ApodResult result = nasaService.getNasaApod(requestedDate);
-        return result.toToolResponseText();
+        try {
+            ApodResult result = nasaService.getNasaApod(requestedDate);
+            return result.toToolResponseText();
+        } catch (IllegalStateException ex) {
+            log.warn("getNasaApod failed for date {}: {}", requestedDate, ex.getMessage());
+            return "NASA APOD error: Unable to fetch the astronomy picture right now " + ex.getMessage();
+        } catch (Exception ex) {
+            log.error("getNasaApod unexpected failure for date {}", requestedDate, ex);
+            return "NASA APOD error: Unable to fetch the astronomy picture right now.";
+        }
     }
 
 }

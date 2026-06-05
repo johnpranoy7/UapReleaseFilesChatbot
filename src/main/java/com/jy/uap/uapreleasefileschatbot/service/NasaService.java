@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
@@ -40,14 +42,23 @@ public class NasaService {
                     .uri(uriBuilder.build().toUri())
                     .retrieve()
                     .body(ApodResult.class);
-        } catch (Exception ex) {
+        } catch (RestClientResponseException ex) {
+            log.error(
+                    "NASA APOD API returned an error for date {}: status={} body={}",
+                    date,
+                    ex.getStatusCode(),
+                    ex.getResponseBodyAsString(),
+                    ex);
+            throw new IllegalStateException(
+                    "NASA APOD is having an issue (HTTP " + ex.getStatusCode().value() + ").", ex);
+        } catch (RestClientException ex) {
             log.error("NASA APOD API call failed for date {}", date, ex);
-            throw new IllegalStateException("Unable to reach NASA APOD API", ex);
+            throw new IllegalStateException("NASA APOD is unavailable right now.", ex);
         }
 
         if (response == null) {
             log.error("NASA APOD API returned an empty response for date {}", date);
-            throw new IllegalStateException("NASA APOD API returned an empty response");
+            throw new IllegalStateException("NASA APOD returned no data for that date.");
         }
 
         log.info("Fetched APOD: {} ({})", response.title(), response.date());

@@ -1,7 +1,6 @@
 package com.jy.uap.uapreleasefileschatbot.config;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -25,15 +24,16 @@ public class ChatbotConfig {
 
             UAP questions → searchUapReleaseDocuments.
             NASA pictures → getNasaApod (omit date for today, else pass resolved YYYY-MM-DD).
+            No year given (March 2, Mar 2) → use {currentDate}'s year. Today → omit date. Pass date as written or YYYY-MM-DD.
 
             JSON only: message, confidence (0.0-1.0), imageUrl (from APOD or null).
-            If nothing useful: message "I do not know. You are not getting any pulsating answers here.", confidence 0.0, imageUrl null.
+            If tool result starts with "NASA APOD error:", tell the user that NASA APOD is having an issue (use the tool message). confidence 0.0, imageUrl null. Do not use the pulsating fallback.
+            If nothing useful and no tool error: message "I do not know. You are not getting any pulsating answers here.", confidence 0.0, imageUrl null.
             """;
 
     @Bean
     public ToolCallAdvisor toolCallAdvisor() {
         return ToolCallAdvisor.builder()
-                .disableInternalConversationHistory()
                 .advisorOrder(Ordered.HIGHEST_PRECEDENCE + 300)
                 .build();
     }
@@ -41,15 +41,11 @@ public class ChatbotConfig {
     @Bean
     public ChatClient openAiChatClient(
             OpenAiChatModel chatModel,
-            ChatMemory chatMemory,
-            AppTools appTools) {
+            AppTools appTools,
+            ToolCallAdvisor toolCallAdvisor) {
         return ChatClient.builder(chatModel)
                 .defaultTools(appTools)
-                .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory)
-                                .order(Ordered.HIGHEST_PRECEDENCE + 200)
-                                .build(),
-                        new SimpleLoggerAdvisor())
+                .defaultAdvisors(toolCallAdvisor, new SimpleLoggerAdvisor())
                 .defaultSystem(SYSTEM_PROMPT)
                 .build();
     }
