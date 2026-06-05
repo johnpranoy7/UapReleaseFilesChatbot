@@ -40,7 +40,7 @@ public class AppTools {
     @Tool(description = """
             Fetch NASA's Astronomy Picture of the Day (APOD).
             Use when the user asks for today's APOD, a NASA astronomy image, or APOD for a specific date.
-            Resolve relative dates using today's date from the system prompt.
+            Resolve relative dates (e.g. "Feb 14 two years ago", "two years before the current year") to YYYY-MM-DD using today's date from the system prompt.
             Call this tool at most once per user request.
             """)
     public String getNasaApod(

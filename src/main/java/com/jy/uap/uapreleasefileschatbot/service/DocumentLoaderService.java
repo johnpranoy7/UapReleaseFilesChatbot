@@ -1,14 +1,17 @@
 package com.jy.uap.uapreleasefileschatbot.service;
 
+import com.jy.uap.uapreleasefileschatbot.dto.DocumentLoadResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,10 +25,17 @@ public class DocumentLoaderService {
     private static final String DOCUMENTS_LOCATION = "classpath:uapDocuments/**/*";
 
     private final VectorStore vectorStore;
+    private final JdbcTemplate jdbcTemplate;
     private final TokenTextSplitter textSplitter;
+    private final String vectorStoreTableName;
 
-    public DocumentLoaderService(VectorStore vectorStore) {
+    public DocumentLoaderService(
+            VectorStore vectorStore,
+            JdbcTemplate jdbcTemplate,
+            @Value("${spring.ai.vectorstore.pgvector.table-name:vector_store}") String vectorStoreTableName) {
         this.vectorStore = vectorStore;
+        this.jdbcTemplate = jdbcTemplate;
+        this.vectorStoreTableName = vectorStoreTableName;
         // Keep chunks well below OpenAI's ~8k embedding limit (batching reserves 10%).
         this.textSplitter = TokenTextSplitter.builder()
                 .withChunkSize(500)
@@ -40,9 +50,17 @@ public class DocumentLoaderService {
      * them into token-sized chunks, embeds them with the configured OpenAI embedding
      * model, and stores them in the pgvector-backed {@link VectorStore}.
      *
-     * @return number of document chunks written to the vector store
+     * Loads documents only when the vector store table is empty.
+     *
+     * @return load outcome including chunk count and whether indexing was skipped
      */
-    public int loadDocuments() throws IOException {
+    public DocumentLoadResult loadDocuments() throws IOException {
+        if (!isVectorStoreEmpty()) {
+            int existingChunks = countVectorStoreRecords();
+            log.info("Vector store already contains {} chunk(s); skipping document load", existingChunks);
+            return DocumentLoadResult.skipped(existingChunks);
+        }
+
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = resolver.getResources(DOCUMENTS_LOCATION);
 
@@ -69,7 +87,7 @@ public class DocumentLoaderService {
 
         if (documents.isEmpty()) {
             log.warn("No documents found under resources/uapDocuments");
-            return 0;
+            return DocumentLoadResult.loaded(0);
         }
 
         List<Document> chunks = textSplitter.apply(documents);
@@ -78,7 +96,18 @@ public class DocumentLoaderService {
 
         log.info("Stored {} chunk(s) from {} source file(s) in the vector store",
                 chunks.size(), filesLoaded);
-        return chunks.size();
+        return DocumentLoadResult.loaded(chunks.size());
+    }
+
+    private boolean isVectorStoreEmpty() {
+        return countVectorStoreRecords() == 0;
+    }
+
+    private int countVectorStoreRecords() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + vectorStoreTableName,
+                Integer.class);
+        return count == null ? 0 : count;
     }
 
 }

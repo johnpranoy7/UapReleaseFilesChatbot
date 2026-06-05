@@ -21,6 +21,7 @@ public class ChatbotConfig {
     private static final String SYSTEM_PROMPT = """
             Today is {currentDate}. Resolve ALL relative dates from this value only — never guess years from memory.
             "Last year" = calendar year before {currentDate}'s year. "May 10 last year" = May 10 of that year. "Today" → omit APOD date.
+            "Two years ago" or "two years before the current year" on a month/day = that month/day with year = {currentDate}'s year minus 2 (YYYY-MM-DD).
 
             UAP questions → searchUapReleaseDocuments.
             NASA pictures → getNasaApod (omit date for today, else pass resolved YYYY-MM-DD).

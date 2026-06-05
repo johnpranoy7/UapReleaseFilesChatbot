@@ -1,5 +1,6 @@
 package com.jy.uap.uapreleasefileschatbot.controller;
 
+import com.jy.uap.uapreleasefileschatbot.dto.DocumentLoadResult;
 import com.jy.uap.uapreleasefileschatbot.service.DocumentLoaderService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,12 +19,20 @@ public class LoadFilesController {
 
     @GetMapping("/loadFiles")
     public Map<String, Object> loadFiles() throws IOException {
-        int chunksLoaded = documentLoaderService.loadDocuments();
+        DocumentLoadResult result = documentLoaderService.loadDocuments();
+        if (result.skipped()) {
+            return Map.of(
+                    "message", "Documents already indexed; skipping load",
+                    "chunksLoaded", result.chunksLoaded(),
+                    "skipped", true
+            );
+        }
         return Map.of(
-                "message", chunksLoaded > 0
+                "message", result.chunksLoaded() > 0
                         ? "Documents loaded and embedded successfully"
                         : "No documents found under resources/uapDocuments",
-                "chunksLoaded", chunksLoaded
+                "chunksLoaded", result.chunksLoaded(),
+                "skipped", false
         );
     }
 }

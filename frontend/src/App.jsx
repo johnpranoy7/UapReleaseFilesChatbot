@@ -10,9 +10,19 @@ function confidenceLabel(value) {
 const SAMPLE_PROMPTS = [
   'What UAP incidents are described in the CIA release files?',
   'What intelligence sources mention experimental programs?',
-  'Summarize reports related to USSR sightings.',
+  "Show me NASA's picture of the day for February 14, two years before the current year",
   "Show me NASA's Astronomy Picture of the Day",
 ];
+
+const SIDE_NAV_TABS = {
+  RECRUITERS: 'recruiters',
+  DEVELOPER: 'developer',
+};
+
+function resolvedApodExampleDate() {
+  const year = new Date().getFullYear() - 2;
+  return `${year}-02-14`;
+}
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -23,6 +33,7 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [promptsExpanded, setPromptsExpanded] = useState(true);
+  const [sideNavTab, setSideNavTab] = useState(SIDE_NAV_TABS.RECRUITERS);
   const messagesEndRef = useRef(null);
   const questionInputRef = useRef(null);
 
@@ -82,7 +93,11 @@ export default function App() {
 
     try {
       const result = await loadDocuments();
-      setStatus(`${result.message} (${result.chunksLoaded} chunks indexed)`);
+      if (result.skipped) {
+        setStatus(`${result.message} (${result.chunksLoaded} chunks already indexed)`);
+      } else {
+        setStatus(`${result.message} (${result.chunksLoaded} chunks indexed)`);
+      }
     } catch (err) {
       setError(err.message || 'Failed to load documents.');
     } finally {
@@ -114,7 +129,7 @@ export default function App() {
           <p className="eyebrow">UFO / UAP Release Files</p>
           <h1>RAG & Toolcalling Chatbot</h1>
           <p className="subtitle">
-            This RAG chatbot answers questions from the US Department of War documents released May 22 (Release 02).
+            Ask questions about U.S. UAP/UFO declassified release documents (Release 02, May 2025) or request NASA&apos;s Astronomy Picture of the Day.
           </p>
         </div>
         <div className="header-actions">
@@ -136,32 +151,116 @@ export default function App() {
         <aside className="side-nav" aria-label="Chatbot tools and usage">
           <p className="side-nav-eyebrow">How it works</p>
           <h2 className="side-nav-title">Built-in tools</h2>
-          <p className="side-nav-intro">
-            The assistant picks the right tool from your question. You do not need to name the tools yourself.
-          </p>
 
-          <section className="tool-card">
-            <h3>Document search</h3>
-            <p>
-              Runs a RAG search over the UAP Files Release 2 documents and answers questions about sightings,
-              intelligence reports, and release file content.
-            </p>
-            <p className="tool-example">Example: &ldquo;What UAP incidents are in the CIA release files?&rdquo;</p>
-          </section>
+          <div className="side-nav-tabs" role="tablist" aria-label="Sidebar audience">
+            <button
+              type="button"
+              role="tab"
+              id="side-nav-tab-recruiters"
+              className={`side-nav-tab${sideNavTab === SIDE_NAV_TABS.RECRUITERS ? ' active' : ''}`}
+              aria-selected={sideNavTab === SIDE_NAV_TABS.RECRUITERS}
+              aria-controls="side-nav-panel-recruiters"
+              onClick={() => setSideNavTab(SIDE_NAV_TABS.RECRUITERS)}
+            >
+              Recruiters
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="side-nav-tab-developer"
+              className={`side-nav-tab${sideNavTab === SIDE_NAV_TABS.DEVELOPER ? ' active' : ''}`}
+              aria-selected={sideNavTab === SIDE_NAV_TABS.DEVELOPER}
+              aria-controls="side-nav-panel-developer"
+              onClick={() => setSideNavTab(SIDE_NAV_TABS.DEVELOPER)}
+            >
+              Developer
+            </button>
+          </div>
 
-          <section className="tool-card">
-            <h3>NASA picture of the day (APOD)</h3>
-            <p>
-              Fetches NASA&apos;s Astronomy Picture of the Day for today or a date you specify, then returns the
-              image and a short description.
-            </p>
-            <p className="tool-example">Example: &ldquo;Show me NASA&apos;s picture for March 2&rdquo;</p>
-          </section>
+          {sideNavTab === SIDE_NAV_TABS.RECRUITERS && (
+            <section
+              id="side-nav-panel-recruiters"
+              role="tabpanel"
+              aria-labelledby="side-nav-tab-recruiters"
+              className="side-nav-panel"
+            >
+              <p className="side-nav-intro">
+                Pick a suggested prompt or ask your own question. The assistant chooses the right capability
+                automatically — document search for UAP release files, or NASA APOD for astronomy images.
+              </p>
 
-          <p className="side-nav-note">
-            <strong>Note:</strong> NASA APOD requests can be slow. The assistant may take extra time while the API
-            responds and the image loads.
-          </p>
+              <div className="tool-card">
+                <h4>Document search <span className="tool-tag">RAG</span></h4>
+                <p>
+                  Searches embedded UAP declassified release PDFs and answers from retrieved context — sightings,
+                  intelligence reports, and related release content.
+                </p>
+                <p className="tool-example">
+                  Example: &ldquo;What UAP incidents are described in the release files?&rdquo;
+                </p>
+              </div>
+
+              <div className="tool-card">
+                <h4>NASA picture of the day <span className="tool-tag">Tool call</span></h4>
+                <p>
+                  Fetches NASA&apos;s Astronomy Picture of the Day for today or a date you specify — including
+                  relative dates in plain English. Spring AI resolves the date and passes{' '}
+                  <code>YYYY-MM-DD</code> to the tool for you.
+                </p>
+                <p className="tool-example">
+                  Try: &ldquo;Show me NASA&apos;s picture of the day for February 14, two years before the current year&rdquo;
+                </p>
+              </div>
+
+              <p className="side-nav-note">
+                <strong>Confidence</strong> shows how well retrieved context supports the answer (0–100%).
+                If nothing useful is found, the assistant says it doesn&apos;t know instead of inventing an answer.
+              </p>
+
+              <p className="side-nav-note side-nav-note-warn">
+                <strong>Note:</strong> NASA APOD can be slow — the assistant may take extra time while the API
+                responds and the image loads.
+              </p>
+            </section>
+          )}
+
+          {sideNavTab === SIDE_NAV_TABS.DEVELOPER && (
+            <section
+              id="side-nav-panel-developer"
+              role="tabpanel"
+              aria-labelledby="side-nav-tab-developer"
+              className="side-nav-panel"
+            >
+              <p className="side-nav-intro">
+                No keyword-based intent routing. Spring AI uses{' '}
+                <strong>tool calling</strong> — the model picks{' '}
+                <code>searchUapReleaseDocuments</code> or <code>getNasaApod</code> and fills arguments from the
+                user&apos;s question.
+              </p>
+
+              <ul className="side-nav-list">
+                <li>PDFs chunked and embedded into <strong>pgvector</strong> (OpenAI embeddings, top-K retrieval)</li>
+                <li><strong>ToolCallAdvisor</strong> routes UAP vs NASA requests at runtime</li>
+                <li><strong>JDBC chat memory</strong> keeps the last 8 messages per session</li>
+                <li>React UI served from the same Spring Boot app (single Docker deploy)</li>
+              </ul>
+
+              <div className="side-nav-dev-note">
+                <p className="side-nav-dev-note-label">Developer note</p>
+                <p>
+                  <strong>Relative date → tool args:</strong> Ask for &ldquo;NASA&apos;s picture of the day for
+                  February 14, two years before the current year.&rdquo; Spring AI injects today&apos;s date into the
+                  system prompt, picks <code>getNasaApod</code>, and passes a resolved{' '}
+                  <code>{resolvedApodExampleDate()}</code> — no custom date-parsing code in the backend.
+                </p>
+              </div>
+
+              <p className="side-nav-stack">
+                <span className="side-nav-stack-label">Built with</span>
+                Spring Boot · Spring AI · OpenAI · pgvector · React · Docker · Render · Supabase
+              </p>
+            </section>
+          )}
         </aside>
 
         <main className="chat-panel">
