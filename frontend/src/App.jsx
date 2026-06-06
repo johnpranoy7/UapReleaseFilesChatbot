@@ -10,7 +10,7 @@ function confidenceLabel(value) {
 const SAMPLE_PROMPTS = [
   'What UAP incidents are described in the CIA release files?',
   'What intelligence sources mention experimental programs?',
-  "Show me NASA's picture of the day for February 14, two years before the current year",
+  "Show me NASA's picture of the day for February 14 of 2 years back",
   "Show me NASA's Astronomy Picture of the Day",
 ];
 
@@ -44,7 +44,7 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [promptsExpanded, setPromptsExpanded] = useState(true);
-  const [developerDetailsExpanded, setDeveloperDetailsExpanded] = useState(true);
+  const [developerDetailsExpanded, setDeveloperDetailsExpanded] = useState(false);
   const [sideNavTab, setSideNavTab] = useState(SIDE_NAV_TABS.RECRUITERS);
   const messagesContainerRef = useRef(null);
   const questionInputRef = useRef(null);
@@ -147,88 +147,87 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="backdrop" aria-hidden="true" />
+      <div className="header-zone">
+        <header className="header">
+          <div className="header-main">
+            <div className="header-project">
+              <p className="eyebrow">Portfolio demo · UFO / UAP Release Files</p>
+              <h1>RAG & Toolcalling Chatbot</h1>
+              <p className="subtitle">
+                Full-stack Spring AI app — ask questions about U.S. UAP declassified release documents
+                (Release 02, May 2025) or request NASA&apos;s Astronomy Picture of the Day.
+              </p>
+            </div>
 
-      <header className="header">
-        <div className="header-main">
-          <div className="header-project">
-            <p className="eyebrow">Portfolio demo · UFO / UAP Release Files</p>
-            <h1>RAG & Toolcalling Chatbot</h1>
-            <p className="subtitle">
-              Full-stack Spring AI app — ask questions about U.S. UAP declassified release documents
-              (Release 02, May 2025) or request NASA&apos;s Astronomy Picture of the Day.
-            </p>
-          </div>
-          <div className={`header-portfolio${developerDetailsExpanded ? ' expanded' : ''}`}>
-            <button
-              type="button"
-              className="header-portfolio-toggle"
-              onClick={() => setDeveloperDetailsExpanded((expanded) => !expanded)}
-              aria-expanded={developerDetailsExpanded}
-              aria-controls="header-portfolio-panel"
-            >
-              <span className="header-portfolio-toggle-title">Portfolio &amp; contact</span>
-              <span className="header-portfolio-toggle-icon" aria-hidden="true">
-                ▾
-              </span>
-            </button>
-            <div
-              id="header-portfolio-panel"
-              className={`header-portfolio-panel${developerDetailsExpanded ? ' expanded' : ''}`}
-              aria-hidden={!developerDetailsExpanded}
-            >
-              <div className="header-portfolio-content">
-                <p className="header-portfolio-eyebrow">Open to software developer roles</p>
-                <p className="header-name">{PORTFOLIO.name}</p>
-                <p className="header-role">{PORTFOLIO.role}</p>
-                <div className="header-links">
-                  <a
-                    href={PORTFOLIO.linkedIn}
-                    className="header-link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </a>
-                  <a
-                    href={PORTFOLIO.github}
-                    className="header-link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                  <a href={`mailto:${PORTFOLIO.email}`} className="header-link">
-                    Email
-                  </a>
-                  {PORTFOLIO.resume && (
+            <div className={`header-portfolio${developerDetailsExpanded ? ' expanded' : ''}`}>
+              <button
+                type="button"
+                className="header-portfolio-toggle"
+                onClick={() => setDeveloperDetailsExpanded((expanded) => !expanded)}
+                aria-expanded={developerDetailsExpanded}
+                aria-controls="header-portfolio-panel"
+              >
+                <span className="header-portfolio-toggle-text">
+                  <span className="header-portfolio-toggle-eyebrow">Developer info</span>
+                  <span className="header-portfolio-toggle-title">{PORTFOLIO.name}</span>
+                  <span className="header-portfolio-toggle-hint">Portfolio &amp; contact</span>
+                </span>
+                <span className="header-portfolio-toggle-icon" aria-hidden="true">
+                  ▾
+                </span>
+              </button>
+              <div
+                id="header-portfolio-panel"
+                className={`header-portfolio-panel${developerDetailsExpanded ? ' expanded' : ''}`}
+                aria-hidden={!developerDetailsExpanded}
+              >
+                <div className="header-portfolio-content">
+                  <p className="header-name">{PORTFOLIO.name}</p>
+                  <p className="header-role">{PORTFOLIO.role}</p>
+                  <p className="header-portfolio-note">Open to software developer roles</p>
+                  <div className="header-links">
                     <a
-                      href={PORTFOLIO.resume}
+                      href={PORTFOLIO.linkedIn}
                       className="header-link"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Resume
+                      LinkedIn
                     </a>
-                  )}
+                    <a
+                      href={PORTFOLIO.github}
+                      className="header-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      GitHub
+                    </a>
+                    <a href={`mailto:${PORTFOLIO.email}`} className="header-link">
+                      Email
+                    </a>
+                    {PORTFOLIO.resume && (
+                      <a
+                        href={PORTFOLIO.resume}
+                        className="header-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Resume
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="header-actions">
-        <button
-            type="button"
-            className="secondary-button"
-            onClick={handleLoadDocuments}
-            disabled={loadingDocs}
-          >
-            {loadingDocs ? 'Indexing…' : 'Index Documents'}
-          </button>
-          <button type="button" className="ghost-button" onClick={handleNewChat}>
-            New Chat
-          </button>
-        </div>
-      </header>
+
+          <div className="header-actions">
+            <button type="button" className="ghost-button" onClick={handleNewChat}>
+              New Chat
+            </button>
+          </div>
+        </header>
+      </div>
 
       <div className="app-layout">
         <aside className="side-nav" aria-label="Chatbot tools and usage">
@@ -330,6 +329,23 @@ export default function App() {
                 <li><strong>JDBC chat memory</strong> keeps the last 8 messages per session</li>
                 <li>React UI served from the same Spring Boot app (single Docker deploy)</li>
               </ul>
+
+              <p className="side-nav-section-label">Admin</p>
+
+              <div className="side-nav-admin">
+                <p>
+                  Embed UAP release PDFs into pgvector once after deploy. Skipped if already indexed.
+                </p>
+                <button
+                  type="button"
+                  className="side-nav-admin-button"
+                  onClick={handleLoadDocuments}
+                  disabled={loadingDocs}
+                >
+                  {loadingDocs ? 'Indexing…' : 'Index documents'}
+                </button>
+                {status && <p className="side-nav-admin-status">{status}</p>}
+              </div>
 
               <div className="side-nav-dev-note">
                 <p className="side-nav-dev-note-label">Developer note</p>
