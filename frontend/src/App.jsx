@@ -222,7 +222,7 @@ export default function App() {
           </div>
 
           <div className="header-actions">
-            <button type="button" className="ghost-button" onClick={handleNewChat}>
+            <button type="button" className="secondary-button" onClick={handleNewChat}>
               New Chat
             </button>
           </div>
