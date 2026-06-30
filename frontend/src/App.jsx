@@ -359,7 +359,7 @@ export default function App() {
 
               <p className="side-nav-stack">
                 <span className="side-nav-stack-label">Built with</span>
-                Spring Boot · Spring AI · OpenAI · pgvector · React · Docker · Render · Supabase
+                Spring Boot · Spring AI · OpenAI · pgvector · React · Docker · Cloudflare Tunnel
               </p>
 
               <p className="side-nav-reference">

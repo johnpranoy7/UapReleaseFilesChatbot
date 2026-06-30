@@ -1,16 +1,16 @@
 services:
   app:
-    build: .
+    image: ${DOCKER_IMAGE}
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8090:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       NASA_API_KEY: ${NASA_API_KEY:-DEMO_KEY}
       POSTGRES_DB: ${POSTGRES_DB:-uap_chatbot}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-root}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-toor}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
@@ -21,9 +21,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-uap_chatbot}
       POSTGRES_USER: ${POSTGRES_USER:-root}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-toor}
-    ports:
-      - "127.0.0.1:5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

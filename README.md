@@ -38,12 +38,12 @@ NASA APOD requests can be **slow** because the assistant makes multiple LLM roun
 |-------|------------|
 | Backend | Spring Boot 4.0.6, Spring AI 2.0.0-M8 |
 | LLM / Embeddings | OpenAI `gpt-4o-mini`, `text-embedding-3-small` |
-| Vector store | PostgreSQL + pgvector (Supabase in production) |
+| Vector store | PostgreSQL + pgvector (Docker Compose) |
 | Chat memory | Spring AI JDBC chat memory + JPA cleanup job |
 | Frontend | React 19, Vite |
 | External APIs | [NASA APOD API](https://github.com/nasa/apod-api) (`api.nasa.gov/planetary/apod`), OpenAI |
-| Local deployment | Docker Compose |
-| Production deployment | Render (Docker) + Supabase (Postgres/pgvector) |
+| Local deployment | Docker Compose (`compose.yaml`) |
+| Production deployment | Self-hosted Docker Compose + Docker Hub + Cloudflare Tunnel |
 
 ## Prerequisites
 
@@ -58,11 +58,16 @@ NASA APOD requests can be **slow** because the assistant makes multiple LLM roun
 
 ### 1. Configure environment variables
 
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` in the project root and fill in your values:
+
+```bash
+cp .env.example .env
+```
 
 ```properties
 OPENAI_API_KEY=your-openai-api-key
 NASA_API_KEY=your-nasa-api-key
+POSTGRES_PASSWORD=change-me-to-a-strong-password
 ```
 
 ### 2. Start PostgreSQL
@@ -113,53 +118,126 @@ docker compose up --build
 
 Open `http://localhost:8080` in your browser.
 
-Environment variables are read from your shell or a `.env` file:
+Environment variables are read from your shell or a `.env` file (see `.env.example`).
 
-```properties
-OPENAI_API_KEY=your-openai-api-key
-NASA_API_KEY=your-nasa-api-key
+## Production Deployment (Self-Hosted + Docker Hub + Cloudflare)
+
+Production runs on your own server with **two Docker containers** (app + Postgres/pgvector). The app image is built by GitHub Actions and published to **Docker Hub**; your server pulls the image instead of building from source.
+
+### Architecture
+
+```text
+Internet → Cloudflare Tunnel → localhost:8080 → app container → postgres container (pgdata volume)
 ```
 
-## Production Deployment (Render + Supabase)
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Recipe to build the app image (React + Spring Boot) |
+| `compose.yaml` | Local dev: builds the app image and starts Postgres |
+| `compose.prod.yaml` | Production: pulls the app image from Docker Hub and starts Postgres |
 
-Production uses **Render** for the Docker app and **Supabase** for managed Postgres/pgvector (not the local Postgres container).
+### 1. Publish the app image (GitHub Actions → Docker Hub)
 
-### Supabase setup
+Add these **repository secrets** in GitHub (`Settings → Secrets and variables → Actions`):
 
-1. Create a Supabase project.
-2. Run in the SQL editor:
+| Secret | Value |
+|--------|-------|
+| `DOCKERHUB_USERNAME` | Your Docker Hub username |
+| `DOCKERHUB_TOKEN` | Docker Hub access token ([create one here](https://hub.docker.com/settings/security)) |
 
-```sql
-create extension if not exists vector;
-```
+On push to `main`/`master`, `.github/workflows/docker-publish.yml` builds and pushes:
 
-3. Use the **Session pooler** connection string (IPv4-compatible for Render).
+- `your-username/uap-release-files-chatbot:latest`
+- `your-username/uap-release-files-chatbot:<git-sha>`
 
-Example Render environment variables:
+You can also trigger the workflow manually from the **Actions** tab.
 
-```properties
-SPRING_PROFILES_ACTIVE=prod
-OPENAI_API_KEY=your-openai-api-key
-NASA_API_KEY=your-nasa-api-key
-SPRING_DATASOURCE_URL=jdbc:postgresql://aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require
-SPRING_DATASOURCE_USERNAME=postgres.<your-project-ref>
-SPRING_DATASOURCE_PASSWORD=your-supabase-db-password
-JAVA_OPTS=-Xmx384m -XX:+UseSerialGC
-```
+### 2. Prepare the server
 
-Deploy with Render using the root `Dockerfile` and `render.yaml`, or connect the GitHub repo as a Docker web service on port `8080` with health check path `/health`.
-
-After the first deploy, index documents once:
+On your home server (Linux with Docker and Docker Compose installed):
 
 ```bash
-curl https://uapreleasefileschatbot.onrender.com/loadFiles
+mkdir -p ~/uap-chatbot
+cd ~/uap-chatbot
 ```
 
-Optional: set the GitHub Actions variable `APP_URL` to your Render URL so `.github/workflows/keep-alive.yml` can ping `/health` and help keep Supabase active.
+Copy `compose.prod.yaml` and create a `.env` file:
+
+```bash
+# Option A: clone the repo and copy files
+git clone <your-repo-url> /tmp/uap-chatbot-src
+cp /tmp/uap-chatbot-src/compose.prod.yaml .
+cp /tmp/uap-chatbot-src/.env.example .env
+
+# Option B: download compose.prod.yaml directly from GitHub
+```
+
+Edit `.env`:
+
+```properties
+DOCKER_IMAGE=your-dockerhub-username/uap-release-files-chatbot:latest
+OPENAI_API_KEY=your-openai-api-key
+NASA_API_KEY=your-nasa-api-key
+POSTGRES_PASSWORD=use-a-long-random-password
+POSTGRES_USER=root
+POSTGRES_DB=uap_chatbot
+```
+
+Start the stack:
+
+```bash
+docker compose -f compose.prod.yaml pull
+docker compose -f compose.prod.yaml up -d
+```
+
+After the first start, index documents once:
+
+```bash
+curl http://localhost:8080/loadFiles
+```
+
+Verify health:
+
+```bash
+curl http://localhost:8080/health
+```
+
+To update after a new image is published:
+
+```bash
+docker compose -f compose.prod.yaml pull
+docker compose -f compose.prod.yaml up -d
+```
+
+Postgres data persists in the `pgdata` Docker volume. The database is **not** exposed to the internet — only the app container can reach it on the internal Docker network.
+
+### 3. Expose via Cloudflare Tunnel
+
+Install [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) on the server and create a tunnel that forwards to `http://localhost:8080` (the app binds to localhost only in `compose.prod.yaml`).
+
+Example `config.yml` for cloudflared:
+
+```yaml
+tunnel: <your-tunnel-id>
+credentials-file: /home/<user>/.cloudflared/<tunnel-id>.json
+
+ingress:
+  - hostname: chatbot.yourdomain.com
+    service: http://localhost:8080
+  - service: http_status:404
+```
+
+Run the tunnel as a system service so it starts on boot. Your public URL becomes `https://chatbot.yourdomain.com`.
+
+Optional: set the GitHub repository variable `APP_URL` to your public URL so `.github/workflows/keep-alive.yml` can ping `/health` twice a week.
 
 ### Resume PDF
 
-Place your resume at `frontend/public/resume.pdf`. It is served at `/resume.pdf` after the Docker build.
+Place your resume at `frontend/public/resume.pdf`. It is served at `/resume.pdf` after the Docker build (included in the published image).
+
+### Legacy: Render + Supabase
+
+`render.yaml` and `application-prod.yml` remain for an external managed Postgres setup (e.g. Render + Supabase) but are no longer the primary deployment path.
 
 ## API Endpoints
 
@@ -213,14 +291,18 @@ uapReleaseFilesChatbot/
 │   └── .../service/          # Chat, document search, NASA APOD
 ├── src/main/resources/
 │   ├── application-dev.yml   # Local development
-│   ├── application-docker.yml# Local Docker Compose profile
-│   ├── application-prod.yml  # Render + Supabase production profile
+│   ├── application-docker.yml# Docker Compose profile (local + self-hosted prod)
+│   ├── application-prod.yml  # Optional external Postgres (e.g. Supabase)
 │   └── uapDocuments/         # Source PDFs for RAG indexing
-├── .github/workflows/        # keep-alive.yml for Supabase health pings
+├── .github/workflows/
+│   ├── docker-publish.yml    # Build and push app image to Docker Hub
+│   └── keep-alive.yml        # Optional health pings for self-hosted URL
 ├── docs/images/              # README screenshots
-├── compose.yaml              # Docker Compose (app + postgres for local dev)
+├── compose.yaml              # Local dev: build app + Postgres
+├── compose.prod.yaml         # Production: pull app image + Postgres
 ├── Dockerfile                # Multi-stage build (frontend + backend)
-├── render.yaml               # Render blueprint
+├── .env.example              # Environment variable template
+├── render.yaml               # Legacy Render blueprint
 └── README.md
 ```
 
@@ -229,8 +311,8 @@ uapReleaseFilesChatbot/
 Key settings are in:
 
 - `src/main/resources/application-dev.yml` — local development
-- `src/main/resources/application-docker.yml` — local Docker profile
-- `src/main/resources/application-prod.yml` — Render + Supabase production
+- `src/main/resources/application-docker.yml` — Docker Compose (local and self-hosted production)
+- `src/main/resources/application-prod.yml` — optional external Postgres
 - `src/main/resources/application.properties` — shared settings, chat memory cleanup cron
 
 | Property | Description |
