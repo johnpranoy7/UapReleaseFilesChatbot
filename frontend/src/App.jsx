@@ -30,6 +30,9 @@ const PORTFOLIO = {
 
 const NASA_APOD_API_REF = 'https://github.com/nasa/apod-api';
 
+const PROJECT_INFO_URL = 'https://johnpranoy7.dev/projects/uap-release-files-chatbot/';
+const ALL_PROJECTS_URL = 'https://johnpranoy7.dev/projects/';
+
 function resolvedApodExampleDate() {
   const year = new Date().getFullYear() - 2;
   return `${year}-02-14`;
@@ -151,6 +154,15 @@ export default function App() {
         <header className="header">
           <div className="header-main">
             <div className="header-project">
+              <a
+                href={PROJECT_INFO_URL}
+                className="header-back-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="header-back-icon" aria-hidden="true">‹</span>
+                Project info
+              </a>
               <p className="eyebrow">Portfolio demo · UFO / UAP Release Files</p>
               <h1>RAG & Toolcalling Chatbot</h1>
               <p className="subtitle">
@@ -231,6 +243,16 @@ export default function App() {
 
       <div className="app-layout">
         <aside className="side-nav" aria-label="Chatbot tools and usage">
+          <a
+            href={ALL_PROJECTS_URL}
+            className="side-nav-all-projects"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="side-nav-all-projects-icon" aria-hidden="true">‹</span>
+            All projects
+          </a>
+
           <div className="side-nav-header">
             <p className="side-nav-eyebrow">Guide</p>
             <h2 className="side-nav-title">How to use this demo</h2>

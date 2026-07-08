@@ -112,6 +112,54 @@ textarea {
   color: #f1f5f9;
 }
 
+.header-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  color: #94a3b8;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease, gap 0.15s ease;
+}
+
+.header-back-link:hover {
+  color: #67e8f9;
+  gap: 7px;
+}
+
+.header-back-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.side-nav-all-projects {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-bottom: 18px;
+  padding: 4px 2px;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease, gap 0.15s ease;
+}
+
+.side-nav-all-projects:hover {
+  color: #67e8f9;
+  gap: 7px;
+}
+
+.side-nav-all-projects-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
 .side-nav-header {
   margin-bottom: 14px;
 }
